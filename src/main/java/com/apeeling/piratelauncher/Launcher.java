@@ -90,7 +90,7 @@ public class Launcher extends JFrame{
                         dialog.setVisible(true);
                         return;
                     }
-                    builder.command(exec);
+                    builder.command("./"+exec);
                 }
                 builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
                 builder.redirectErrorStream(true);
