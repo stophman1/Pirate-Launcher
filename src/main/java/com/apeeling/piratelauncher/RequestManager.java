@@ -62,6 +62,7 @@ public class RequestManager {
             ErrorWindow dialog = new ErrorWindow("Your OS is not supported by this launcher.");
             dialog.pack();
             dialog.setVisible(true);
+            return;
         }
         Map<String, Object> curFile = GetFiles(server);
         Object[] leArray = curFile.keySet().toArray();
@@ -144,17 +145,11 @@ public class RequestManager {
     public String detectOS() {
         String osUsed = null;
         if (SystemUtils.IS_OS_LINUX) {
-            if (System.getProperty("sun.arch.data.model").equalsIgnoreCase("64")) {
-                osUsed = "linux2";
-            }
+            if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) osUsed = "linux2";
         }
-        if (SystemUtils.IS_OS_WINDOWS) {
-            if (System.getProperty("sun.arch.data.model").equalsIgnoreCase("64")) {
-                osUsed = "win64";
-            }
-        } else {
-            osUsed = "unsupported";
-        }
+        else if (SystemUtils.IS_OS_WINDOWS) {
+            if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) osUsed = "win64";
+        } else osUsed = "unsupported";
         return osUsed;
     }
 
