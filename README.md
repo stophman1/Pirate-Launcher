@@ -1,6 +1,15 @@
 # Pirate-Launcher
-Launcher for TLOPO made in Java
+Launcher for The Legends of Pirates Online developed in Java.
 
-It works out of the box on Windows you just need Java. On Linux you need to install some libs to launch tlopo.
-You can just run ./tlopo to find the libs you need.
-libpng12 and libssl1.0.0 are the only 2 known by me currently.
+### Windows
+It works out of the box on Windows. All you need is Java. 
+
+### Linux
+On Linux, you need to install some libraries to launch TLOPO.
+You can just run `./tlopo` after you have downloaded the game. 
+It should throw out the libraries you need to get as errors.
+`libpng12` and `libssl1.0.0` are the only two I know.
+If you find additional libraries, please share them.
+
+### Macintosh
+This launcher doesn't have Apple Macintosh support currently. I don't own a Macintosh to test it on.
