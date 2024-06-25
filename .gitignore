@@ -1,3 +1,13 @@
 # Project exclude paths
 /out/
 /target/
+/cache.dat
+/*.dll
+*.exe
+/game_api.txt
+/game_options.txt
+/last_working_options.txt
+/resources/
+/logs/
+/cache/
+/.idea/

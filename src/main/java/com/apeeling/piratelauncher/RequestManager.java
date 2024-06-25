@@ -6,16 +6,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.*;
 
 import com.google.gson.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 public class RequestManager {
-    public static void main(String[] args) {
-        //System.out.print(GetExec("https://download.tlopo.com/win32/patcher.json"));
-    }
-
     public String GetVersion() throws IOException {
         String webPage = "https://api.tlopo.com/releases/feed";
 
@@ -56,7 +53,7 @@ public class RequestManager {
     }
 
 
-    public void DownloadMan(String server) throws IOException, NoSuchAlgorithmException {
+    public void DownloadMan(String server) throws IOException, NoSuchAlgorithmException, InterruptedException {
         String osUsed = detectOS();
         if (osUsed.equals("unsupported")) {
             ErrorWindow dialog = new ErrorWindow("Your OS is not supported by this launcher.");
@@ -66,35 +63,57 @@ public class RequestManager {
         }
         Map<String, Object> curFile = GetFiles(server);
         Object[] leArray = curFile.keySet().toArray();
-        Thread downThing = new Thread(() -> {
-            for (Object o : leArray) {
+        class RunnableClass implements Runnable{
+            Object obj;
+
+            public RunnableClass(Object o) {
+                this.obj = o;
+            }
+
+            public void run() {
                 try {
                     downFile(osUsed,
-                            curFile.get(o).toString().substring(1, curFile.get(o).toString().length() - 1).split(", ")[0].substring(5),
-                            (String) o,
+                            curFile.get(obj).toString().substring(1, curFile.get(obj).toString().length() - 1).split(", ")[0].substring(5),
+                            (String) obj,
                             server,
-                            curFile.get(o).toString().substring(1, curFile.get(o).toString().length() - 1).split(", ")[1].substring(5));
-                } catch (IOException | NoSuchAlgorithmException e) {
-                    e.printStackTrace();
+                            curFile.get(obj).toString().substring(1, curFile.get(obj).toString().length() - 1).split(", ")[1].substring(5));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
                 }
             }
-            ErrorWindow dialog = new ErrorWindow("Download complete. :- ]");
-            dialog.pack();
-            dialog.setVisible(true);
-        });
-        downThing.start();
+        }
+        ExecutorService executor= Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        int i = 0;
+        for (Object o : leArray) {
+            i++;
+            executor.execute(new RunnableClass(o));
+            }
+        executor.shutdown();
+        executor.awaitTermination(15, TimeUnit.MINUTES);
+            //Inform the user when they can play
+            //ErrorWindow dialog = new ErrorWindow("Download complete. :- ]");
+            //dialog.pack();
+            //dialog.setVisible(true);
     }
 
     public void downFile(String osUsed, String filePath, String file, String server, String hash) throws IOException, NoSuchAlgorithmException {
         if (hashCompare(file, server, hash)) {
-            //System.out.println("SAME HASH!!!");
+            //System.out.println("Identical Hash!!!");
             return;
+        }
+        try {
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
         }
         String downloadURL = String.format("https://%s.tlopo.com/%s/%s.bz2", server, osUsed, file);
         System.out.println(downloadURL);
         new File(filePath).mkdirs();
         try (BufferedInputStream inputStream = new BufferedInputStream(new URL(downloadURL).openStream());
-             FileOutputStream fileOut = new FileOutputStream(file + ".bz2")) //I forgor 💀 this isn't old Java :( I ain't going to rewrite this
+             FileOutputStream fileOut = new FileOutputStream(file + ".bz2"))
         {
             byte[] data = new byte[1024];
             int byteContent;
@@ -143,6 +162,7 @@ public class RequestManager {
     }
 
     public String detectOS() {
+        //linux2 win64 and mac are supported by TLOPO
         String osUsed = null;
         if (SystemUtils.IS_OS_LINUX) {
             if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) osUsed = "linux2";

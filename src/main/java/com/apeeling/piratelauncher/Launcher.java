@@ -16,7 +16,6 @@ public class Launcher extends JFrame{
     private JButton playButton;
     private JTextField UsernameBox;
     private JLabel gameVersion;
-    private JButton downloadButton;
     private JLabel fileName;
     private JProgressBar downloadBar;
 
@@ -41,35 +40,40 @@ public class Launcher extends JFrame{
         this.setContentPane(mainPanel);
         this.setResizable(false);
         this.setSize(500, 250);
-        downloadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Object item = comboBox1.getSelectedItem();
-                String value = ((ComboItem)item).getValue();
-                fileName.setVisible(true);
-                fileName.setText("Download Started");
-                //System.out.println(value);
-                new Thread();
-                try {
-                    rqman.DownloadMan(value);
-                } catch (IOException | NoSuchAlgorithmException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                fileName.setVisible(true);
+                fileName.setText("Downloading");
                 RequestManager rqman = new RequestManager();
                 Object item = comboBox1.getSelectedItem();
                 String value = ((ComboItem)item).getValue();
-                try {
-                    Object[] myCoolArray = rqman.login(UsernameBox.getText(), PasswordBox.getPassword());
-                    if(!(myCoolArray==null)){
-                    launchgame(myCoolArray[2].toString(), myCoolArray[3].toString(), rqman.detectOS(), rqman.GetExec(value));}
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                Thread download = new Thread(() -> {
+                    try {
+                        rqman.DownloadMan(value);
+                    } catch (IOException | NoSuchAlgorithmException ex) {
+                        ex.printStackTrace();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+                download.start();
+                new Thread(() -> {
+                    try {
+                        download.join();
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    fileName.setText("Launching Game");
+                    try {
+                        Object[] myCoolArray = rqman.login(UsernameBox.getText(), PasswordBox.getPassword());
+                        if (!(myCoolArray == null)) {
+                            launchgame(myCoolArray[2].toString(), myCoolArray[3].toString(), rqman.detectOS(), rqman.GetExec(value));
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }).start();
 
             }
         });
