@@ -92,6 +92,9 @@ public class RequestManager {
             }
         executor.shutdown();
         executor.awaitTermination(15, TimeUnit.MINUTES);
+        if(detectOS().equals("linux2")){ //Temporary hack because executable is missing in the patcher.json
+            downFile("linux2", "", "tlopo", server, null);
+        }
             //Inform the user when they can play
             //ErrorWindow dialog = new ErrorWindow("Download complete. :- ]");
             //dialog.pack();
@@ -100,7 +103,6 @@ public class RequestManager {
 
     public void downFile(String osUsed, String filePath, String file, String server, String hash) throws IOException, NoSuchAlgorithmException {
         if (hashCompare(file, server, hash)) {
-            //System.out.println("Identical Hash!!!");
             return;
         }
         try {
@@ -156,7 +158,11 @@ public class RequestManager {
         }
         else if (SystemUtils.IS_OS_WINDOWS) {
             if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) osUsed = "win64";
-        } else osUsed = "unsupported";
+        }
+        else if (SystemUtils.IS_OS_MAC_OSX) {
+            if (System.getProperty("os.arch").equalsIgnoreCase("amd64")) osUsed = "mac";
+        }
+        else osUsed = "unsupported";
         return osUsed;
     }
 

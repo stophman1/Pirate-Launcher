@@ -85,17 +85,18 @@ public class Launcher extends JFrame{
             public void run() {
                 if(cookie==null && server == null) return;
                 ProcessBuilder builder = new ProcessBuilder();
-                if(os.equals("win64")) builder.command(exec);
+                if(os.equals("win64") || os.equals("mac")) builder.command(exec);
                 if(os.equals("linux2")){
                     boolean makeExec = new File(exec).setExecutable(true);
                     if(!makeExec) {
-                        ErrorWindow dialog = new ErrorWindow("Linux Error: Can not mark "+exec+" as executable!");
+                        ErrorWindow dialog = new ErrorWindow("Unix Error: Can not mark "+exec+" as executable!");
                         dialog.pack();
                         dialog.setVisible(true);
                         return;
                     }
                     builder.command("./"+exec);
                 }
+
                 builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
                 builder.redirectErrorStream(true);
                 Map<String, String> envVar = builder.environment();
