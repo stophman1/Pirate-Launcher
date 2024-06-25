@@ -112,8 +112,8 @@ public class RequestManager {
         String downloadURL = String.format("https://%s.tlopo.com/%s/%s.bz2", server, osUsed, file);
         System.out.println(downloadURL);
         new File(filePath).mkdirs();
-        try (BufferedInputStream inputStream = new BufferedInputStream(new URL(downloadURL).openStream());
-             FileOutputStream fileOut = new FileOutputStream(file + ".bz2"))
+        try (BZip2CompressorInputStream inputStream = new BZip2CompressorInputStream(new BufferedInputStream(new URL(downloadURL).openStream()));
+             FileOutputStream fileOut = new FileOutputStream(file))
         {
             byte[] data = new byte[1024];
             int byteContent;
@@ -121,19 +121,6 @@ public class RequestManager {
                 fileOut.write(data, 0, byteContent);
             }
         }
-        bz2Man(file);
-    }
-
-    public void bz2Man(String file) throws IOException {
-        try (BZip2CompressorInputStream inputStream = new BZip2CompressorInputStream(new BufferedInputStream(new FileInputStream(file + ".bz2")));
-             FileOutputStream fileOut = new FileOutputStream(file)) {
-            byte[] data = new byte[1024];
-            int byteContent;
-            while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
-                fileOut.write(data, 0, byteContent);
-            }
-        }
-        new File(file + ".bz2").delete();
     }
 
     public String hashCheck(String file) throws IOException, NoSuchAlgorithmException {
