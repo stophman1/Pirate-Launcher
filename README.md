@@ -12,4 +12,4 @@ It should throw out the libraries you need to get as errors.
 If you find additional libraries, please share them.
 
 ### Macintosh
-This launcher doesn't have Apple Macintosh support currently. I don't own a Macintosh to test it on.
+This launcher might have Apple Macintosh support. I don't own a Macintosh to test it on.
